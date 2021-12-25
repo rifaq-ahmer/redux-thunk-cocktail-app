@@ -1,0 +1,112 @@
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { fetchSingleCocktail } from "../redux/action";
+import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+
+const SingleCocktail = () => {
+	const { cocktail, loading } = useSelector((state) => ({ ...state.data }));
+	const [modifiedCocktail, setModifiedCocktail] = useState(null);
+	const { id } = useParams();
+	let dispatch = useDispatch();
+
+	useEffect(() => {
+		dispatch(fetchSingleCocktail(id));
+	}, [id]);
+
+	useEffect(() => {
+		if (cocktail.length > 0) {
+			const {
+				strDrink: name,
+				strDrinkThumb: image,
+				strAlcoholic: info,
+				strCategory: category,
+				strGlass: glass,
+				strInstructions: instructions,
+				strIngredient1,
+				strIngredient2,
+				strIngredient3,
+				strIngredient4,
+				strIngredient5,
+			} = cocktail[0];
+
+			const ingredient = [
+				strIngredient1,
+				strIngredient2,
+				strIngredient3,
+				strIngredient4,
+				strIngredient5,
+			];
+			const newCocktail = {
+				name,
+				image,
+				info,
+				category,
+				glass,
+				instructions,
+				ingredient,
+			};
+			setModifiedCocktail(newCocktail);
+		} else {
+			setModifiedCocktail(null);
+		}
+	}, [id, cocktail]);
+
+	if (!modifiedCocktail) {
+		return <h2 className="section-title">NO COCKTAIL TO DISPLAY......!</h2>;
+	} else {
+		const { name, info, category, image, glass, instructions, ingredient } =
+			modifiedCocktail;
+		return (
+			<>
+				{loading ? (
+					<div className="spinner-grow" role="status">
+						<span className="visually-hidden">Loading...</span>
+					</div>
+				) : (
+					<section className="section cocktail-section">
+						<Link to="/">
+							<button className="btn btn-danger" style={{ marginTop: "2rem" }}>
+								Go Back
+							</button>
+						</Link>
+						<h2 className="section-title">{name}</h2>
+						<div className="drink">
+							<img src={image} alt={name} />
+							<div className="drink-info">
+								<p>
+									<span className="drink-data">Name : </span>
+									{name}
+								</p>
+								<p>
+									<span className="drink-data">Category : </span>
+									{category}
+								</p>
+								<p>
+									<span className="drink-data">Information : </span>
+									{info}
+								</p>
+								<p>
+									<span className="drink-data">Glass : </span>
+									{glass}
+								</p>
+								<p>
+									<span className="drink-data">Instructions : </span>
+									{instructions}
+								</p>
+								<p>
+									<span className="drink-data">Ingredients : </span>
+									{ingredient.map((item, index) => {
+										return item && <span key={index}>{item}</span>;
+									})}
+								</p>
+							</div>
+						</div>
+					</section>
+				)}
+			</>
+		);
+	}
+};
+
+export default SingleCocktail;
